@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <title>Update 027 Avatar Movement</title>
+  </head>
+  <body>
+    <p><i><small>Dragon's Eye Productions, Inc. reserves the right to change any practices, protocols, or formats described in this document without prior notice.</small></i></p>
+    <hr width="50%"/>
+    
+    <h1>Update 027 Avatar Movement</h1>
+    
+    <h2>Status of this Document</h2>
+    
+    <p>This document specifies the current Avatar Movement protocol on Furcadia, as at Update 027. This document updates and supersedes the file "023_new_movement.pdf". Distribution of this document is unlimited.</p>
+    
+    <h2>Introduction</h2>
+    
+    <p>Update 023 introduced a new movement scheme, but since then, additional fields have been added to the movement-related commands, which need to be documented.</p>
+
+    <p>The movement commands are used both for the player and all other avatars they see on the screen. The client is responsible for tracking (if it needs to) which of the avatars is the player.</p>
+    
+    <p>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in <a href="https://www.ietf.org/rfc/rfc2119.txt">RFC2119</a>.
+    
+    <h2>Spawn Avatar</h2>
+    <p><code>'&lt;' + user id + x + y + shape number + name + color code + flag + linefeed</code></p>
+    
+    <p>The Spawn Avatar command is used to send all necessary metadata about an Avatar, which the client can then use to display that Avatar when subsequent movement commands are received. The command is sent when an avatar first appears in the dream, and then periodically thereafter. On entry to a dream, this command is sent to the player once for each Avatar in the dream, including themselves.</p>
+
+    <p>The <em>Spawn Avatar</em> command SHOULD always sent to the client before any other packets related to movement, for that User ID.<br />
+    If a <em>Spawn Avatar</em> command has not been received for a User ID referred to by another command, the client MAY query for a resend of the packet by sending the following command to the server:<br />
+    <code>rev <Base 220 encoded, 4 byte user id></p></code>
+    
+    <table border="1">
+    <tr><th>Name</th><th>Type</th><th>Size (bytes)</th><th>Description</th></tr>
+    <tr><td>Command Id</td><td>CHAR</td><td>1</td><td>Always '<' (0x3c)</td></tr>
+    <tr><td>User ID</td><td>BASE220 INT</td><td>4</td><td>Unique User ID</td></tr>
+    <tr><td>X</td><td>BASE220 INT</td><td>2</td><td>Map position X</td></tr>
+    <tr><td>Y</td><td>BASE220 INT</td><td>2</td><td>Map position Y</td></tr>
+    <tr><td>Shape Number</td><td>BASE220 INT</td><td>2</td><td>Avatar shape number</td></tr>
+    <tr><td>Name</td><td>BASE220 STRING</td><td>2+</td><td>Character name</td></tr>
+    <tr><td>Color Code</td><td>COLORCODE</td><td>11-30</td><td>Avatar color code (short form)</td></tr>
+    <tr><td>Flag</td><td>BASE220 INT</td><td>1</td><td>Zero, or any combination of the following flags:<br />CHAR_FLAG_HAS_PROFILE = 1<br />CHAR_FLAG_SET_VISIBLE = 2<br />CHAR_FLAG_NEW_AVATAR = 4</td></tr>
+    <tr><td>AFK Greyness</td><td>BASE220 INT</td><td>4</td><td>AFK time in seconds</td></tr>
+    <tr><td>Scale</td><td>BASE220 INT</td><td>1</td><td>Display scale of the avatar, as a percentage</td></tr>
+    </table>
+
+    <p>Clients MUST handle arbitrary-length character names, from 1 to 220 characters.<br />
+    Clients SHOULD handle name lengths between 2 and 64 characters without modification.<br />
+    Clients MAY locally truncate and/or pad names outside that range.<br />
+    Clients MAY handle zero and negative (-1 to -35) lengths.<br />
+    Clients SHOULD NOT truncate within multi-byte characters.<br />
+    Clients MUST NOT use truncated/padded names in any communication with the server.<br />
+    Clients MAY use this command to maintain a locally cached version of the Ctrl-W "Who: list.</p>
+
+    <p>The color code is <em>currently</em> always an old-style ('t') colorcode, in short form, eleven bytes long, lacking the extra bytes for gender, species, and special information. This information has been superseded by the Shape Number.<br />
+    Clients SHOULD also implement parsing of the proposed <a href="http://dev.furcadia.com/docs/023_new_movement.pdf">new colorcode</a> format.<br />
+    Clients MUST gracefully handle Spawn Avatar commands sent with the new colorcode format, even if they cannot parse the colors.</p>
+    
+    <p>AFK Greyness is new since 023 and has caused some confusion. To prevent this:<br />
+    The AFK Greyness MUST NOT be assumed to represent seconds; it is just an approximate tick counter, which can jump up or down unexpectedly.<br />
+    The AFK Greyness SHOULD NOT be displayed to the user in numeric form, as it can cause some unpleasant social problems. This is a technical-requirements SHOULD NOT, but it is best for distributed third party apps to consider it a ToS-requirements MUST NOT thing. As with all good things, abuse of this field may result in it being disabled.<br />
+    This field SHOULD be displayed to the user as an incremental greying out of the Avatar.</p>
+
+    <p>Scale is new in 027.<br />
+    The client MUST handle scale percentages from 10 to 200.<br />
+    The client SHOULD handle scale percentages from 1 to 220.<br />
+    The client MAY handle scale percentages of 0, and negative values down to -35, displaying these however they wish. It's RECOMMENDED in this case to display them flipped, and scaled by 5 times the negative amount (so -20 would be flipped at normal scale), but there is currently no official standard for this.<br />
+    The scale SHOULD be displayed to the user as a change in size of the Avatar.</p>
+
+    <p>CHAR_FLAG_HAS_PROFILE is not currently implemented serverside. Once character profiles are implemented, this flag can tell the context menu whether to show a "view profile" item.</p>
+    
+    <p>CHAR_FLAG_NEW_AVATAR states that the server believes this player has just (re)connected. While currently implemented by the server, this is not used by the the windows client. This flag may not necessarily be set in the very first Spawn Avatar command for that Avatar, and may be sent more than once - it is typically set in response to the 'khan' command, but may also be set by use of the 'color' command.</p>
+
+    <p>CHAR_FLAG_SET_VISIBLE is used to indicate that the character should be set invisible. This supersedes the old method, which used a negative Shape Number. Both methods are currently implemented in the Windows client, but not used by the server.<br />
+    Clients SHOULD implement the flag.<br />
+    Clients MAY implement the old form in addition.</p>
+
+    
+    <h2>Animated Move</h2>
+
+    <p><code>'/' + user id + x + y + shape + linefeed</code></p>
+
+    <p>This command performs an animated move from the current position of the Avatar (as the client displays it) to the target location, in a straight line. The duration of the move is not specified by this protocol, but should be reasonably fast, but non-zero. The Windows client takes as long as a normal step from one square to another, whatever the distance.</p>
+
+    <p>Animation SHOULD include both the walk animation, and any fox file animation using kitterspeak.</p>
+
+    <table border="1">
+    <tr><th>Name</th><th>Type</th><th>Size (bytes)</th><th>Description</th></tr>
+    <tr><td>Command Id</td><td>CHAR</td><td>1</td><td>Always '/' (0x2f)</td></tr>
+    <tr><td>User ID</td><td>BASE220 INT</td><td>4</td><td>Unique User ID</td></tr>
+    <tr><td>X</td><td>BASE220 INT</td><td>2</td><td>Map position X to move to</td></tr>
+    <tr><td>Y</td><td>BASE220 INT</td><td>2</td><td>Map position Y to move to</td></tr>
+    <tr><td>Shape Number</td><td>BASE220 INT</td><td>2</td><td>Avatar target shape number</td></tr>
+    </table>
+
+
+    <h2>Move Avatar</h2>
+
+    <p>This command performs an instantaneous move from the current position of the Avatar (as the client displays it) to the target location.</p>
+
+    <p><code>'A' + user id + x + y + shape + linefeed</code></p>
+
+    <table border="1">
+    <tr><th>Name</th><th>Type</th><th>Size (bytes)</th><th>Description</th></tr>
+    <tr><td>Command Id</td><td>CHAR</td><td>1</td><td>Always '/' (0x2f)</td></tr>
+    <tr><td>User ID</td><td>BASE220 INT</td><td>4</td><td>Unique User ID</td></tr>
+    <tr><td>X</td><td>BASE220 INT</td><td>2</td><td>New map position X</td></tr>
+    <tr><td>Y</td><td>BASE220 INT</td><td>2</td><td>New map position Y</td></tr>
+    <tr><td>Shape Number</td><td>BASE220 INT</td><td>2</td><td>Avatar target shape number</td></tr>
+    </table>
+
+
+    <h2>Update Color Code</h2>
+
+    <p><code>'B' + user id + shape + color code + linefeed</code></p>
+
+    <p>This command is sent if an avatar's colors change. It can also be sent in situations where the colors have not changed, to the client MUST handle 'changing' to the same color.</p>
+
+    <table border="1">
+    <tr><th>Name</th><th>Type</th><th>Size (bytes)</th><th>Description</th></tr>
+    <tr><td>Command Id</td><td>CHAR</td><td>1</td><td>Always 'B' (0x42)</td></tr>
+    <tr><td>User ID</td><td>BASE220 INT</td><td>4</td><td>Unique User ID</td></tr>
+    <tr><td>Shape Number</td><td>BASE220 INT</td><td>2</td><td>Avatar shape number</td></tr>
+    <tr><td>Color Code</td><td>COLORCODE</td><td>11-30</td><td>Avatar color code</td></tr>
+    </table>
+
+    <p>The color code is <em>currently</em> always an old-style ('t') colorcode, in short form, eleven bytes long, lacking the extra bytes for gender, species, and special information. This information has been superseded by the Shape Number.<br />
+    Clients SHOULD also implement parsing of the proposed <a href="http://dev.furcadia.com/docs/023_new_movement.pdf">new colorcode</a> format.<br />
+    Clients MUST gracefully handle Spawn Avatar commands sent with the new colorcode format, even if they cannot parse the colors.</p>
+    
+
+    <h2>Hide Avatar</h2>
+
+    <p><code>'C' + user id + x + y + linefeed</code></p>
+
+    <p>This command is used to enforce visibility outside the viewable screen area. This helps to prevent ghosting. If an Avatar moves out of visible range, and the client no longer receives immediate updates on its location, then if the player moved to follow that Avatar, they would see a 'ghost' of it displayed in the last location that they had received an update for, even if they had since moved on. Hence, this command makes ghosts invisible when they walk off the screen.</p>
+
+    <p>This command is possibly also used to handle visibility within regions.</p>
+
+    <table border="1">
+    <tr><th>Name</th><th>Type</th><th>Size (bytes)</th><th>Description</th></tr>
+    <tr><td>Command Id</td><td>CHAR</td><td>1</td><td>Always 'C' (0x43)</td></tr>
+    <tr><td>User ID</td><td>BASE220 INT</td><td>4</td><td>Unique User ID</td></tr>
+    <tr><td>X</td><td>BASE220 INT</td><td>2</td><td>New map position X</td></tr>
+    <tr><td>Y</td><td>BASE220 INT</td><td>2</td><td>New map position Y</td></tr>
+    </table>
+
+    
+
+    <h2>Remove Avatar</h2>
+
+    <p><code>')' + user id + linefeed</code></p>
+
+    <p>This command is used to let the client know that the avatar has disconnected, gone to another dream, etc. .</p>
+
+    <table border="1">
+    <tr><th>Name</th><th>Type</th><th>Size (bytes)</th><th>Description</th></tr>
+    <tr><td>Command Id</td><td>CHAR</td><td>1</td><td>Always ')' (0x29)</td></tr>
+    <tr><td>User ID</td><td>BASE220 INT</td><td>4</td><td>Unique User ID</td></tr>
+    </table>
+
+    <p>Clients MAY use this command to remove the named entry from a cached version of the Ctrl-W "Who" list.</p>
+
+    <hr width="50%"/>
+    <p><small>&copy; Dragon's Eye Productions, Inc. 2012.</small></p>
+  </body>
+</html>

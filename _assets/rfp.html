@@ -1,0 +1,1213 @@
+<html><head>
+<style type="text/css">
+A.contents
+{
+COLOR: #EECA24;
+FONT-FAMILY: arial;
+FONT-SIZE: 12px;
+FONT-WEIGHT: bold;
+TEXT-DECORATION: none;
+}
+
+A:HOVER
+{
+COLOR: #AAAAAA;
+CURSOR: default;
+TEXT-DECORATION: underline overline;
+}
+
+BLOCKQUOTE
+{
+MARGIN-TOP: 0px;
+PADDING-TOP: 0px;
+MARGIN-BOTTOM: 0px;
+PADDING-BOTTOM: 0px;
+}
+
+BODY
+{
+BACKGROUND-COLOR: #0f0238;
+COLOR: #EECA24;
+FONT-FAMILY: arial;
+FONT-SIZE: 12px;
+FONT-WEIGHT: bold;
+}
+
+HR
+{
+BORDER: 0;
+COLOR: #EECA24;
+HEIGHT: 1px;
+WIDTH: 95%;
+}
+
+TABLE.ffb
+{
+BORDER-COLOR: #ffffff;
+BORDER-STYLE: outset;
+BORDER-WIDTH: 1px;
+}
+
+.code
+{
+COLOR: #EECA24;
+FONT-FAMILY: courier new;
+FONT-SIZE: 12px;
+FONT-WEIGHT: bold;
+}
+
+.ctsb
+{
+BORDER-WIDTH: 2px;
+BORDER-COLOR: #00F000;
+BORDER-STYLE: outset;
+FONT-FAMILY: tahoma;
+FONT-SIZE: 12px;
+WIDTH: 300;
+}
+
+.ctsc
+{
+BORDER-WIDTH: 2px;
+BORDER-COLOR: #0000F0;
+BORDER-STYLE: outset;
+FONT-FAMILY: tahoma;
+FONT-SIZE: 12px;
+WIDTH: 300;
+}
+
+.ctsd
+{
+BORDER-WIDTH: 2px;
+BORDER-COLOR: #00F0F0;
+BORDER-STYLE: outset;
+FONT-FAMILY: tahoma;
+FONT-SIZE: 12px;
+WIDTH: 300;
+}
+
+.ff
+{
+CELL-BORDER: 0px;
+CELL-PADDING: 0px;
+COLOR: #EECA24;
+FONT-FAMILY: arial;
+FONT-SIZE: 12px;
+FONT-WEIGHT: bold;
+}
+
+.gnu
+{
+BORDER-WIDTH: 2px;
+BORDER-COLOR: #00F000;
+BORDER-STYLE: dashed;
+}
+
+.stc
+{
+BORDER-WIDTH: 2px;
+BORDER-COLOR: #800000;
+BORDER-STYLE: outset;
+FONT-FAMILY: tahoma;
+FONT-SIZE: 12px;
+WIDTH: 300;
+}
+</style><title>RedI Furcadia Protocol</title></head>
+
+<body>
+RedI Furcadia Protocol (RFPv015)<br>
+<br>
+<table width="425" class="gnu">
+<tbody><tr><td>
+<font color="#008000" family="Arial" size="2">
+This documentation is free, but it is licensed under the terms of the<br>
+GNU Free Documentation License as published by the Free Software<br>
+Foundation; either version 1.2 of the License, or (at your option)<br>
+any later version.<br>
+<br>
+<a href="http://www.gnu.org/">http://www.gnu.org</a>
+</font>
+</td></tr>
+</tbody></table>
+
+<br>
+Basically, ^that^ means that you cannot remove the following credits
+from the original content if you modify, redistribute, or burn this
+document.<br>
+
+<br>
+
+Credits:
+<ul>
+	<li>Xemberad - Protocol Documentation<br>
+	</li><li>Kylix - File Format Documentation<br>
+	</li><li>Morpius, et al. @ <a href="http://www.geocities.com/xemberad/_dump/_furc/furcadianprotocol.txt" notarget="">his protocol specifications</a><br>
+		 - Forgotten information
+	</li><li>Null Flux - tellgroup, telltrainees, \n:\r packet termination, motd concept
+</li></ul>
+
+<hr>
+<br>
+
+Contents:
+	<ol>
+	<li><a href="#int" class="contents">Introduction</a>
+	</li><li><a href="#stc" class="contents">Data sent from server to client</a>
+	</li><li><a href="#ctsc" class="contents">Data sent from client to server (common access)</a>
+		<ol type="disc">
+		<li><a href="#co" class="contents">Cookies</a>
+		</li><li><a href="#in" class="contents">Interaction</a>
+		</li><li><a href="#ma" class="contents">Manipulation</a>
+		</li><li><a href="#mo" class="contents">Movement</a>
+		</li><li><a href="#ro" class="contents">Roses</a>
+		</li><li><a href="#se" class="contents">Server Control</a>
+		</li></ol>
+	</li><li><a href="#ctsd" class="contents">Data sent from client to server (Dream owner access)</a>
+	</li><li><a href="#ctsb" class="contents">Data sent from client to server (Beekin access)</a>
+	</li><li><a href="#ex" class="contents">Example connection</a>
+	</li><li><a href="#ff" class="contents">Furcadia file formats</a>
+	</li><li><a href="#cf" class="contents">Conversion functions</a>
+	</li><li><a href="#con" class="contents">Conclusion</a>
+	</li></ol>
+
+<hr>
+<br>
+
+Notes:
+<ol>
+	<li>All Furcadia number strings are stored in 2 bytes.
+	</li><li>All X coordinates are halved from what is perceived in Furcadia.
+	</li><li>Furcadia uses UNIX pipes ( | ) to represent spaces.
+	</li><li>All numbers are stored in Base95 format when sent to the client.  This way, each number has a specific<br>
+		length that the client can read and a procedure to follow without receiving errors.
+	</li><li>All lines sent from server to client and vice versa are terminated with a new line character (\n, \r, vbCr, or Chr$(10)).
+	</li><li>The MOTD is sent in one packet.
+	</li><li>{foo} is a string.
+	</li><li>(foo) is a Furcadia number (Base95).
+	</li><li>Any characters enclosed within [ ] are optional.
+</li></ol>
+
+<a name="int">
+</a><hr>
+<a name="int"><br>
+
+Introduction:<br>
+<br>
+Greetings! The RedI Furcadia Protocol is intended to contain all the core information you need to understand<br>
+Furcadia in one document. This document was written to spread our knowledge of Furcadia to those who wish to<br>
+learn it, and to be a reference to those who already understand it. We hope the neophytes learn much from this<br>
+document and the veterans use it as a constant reference. Enjoy the document and thank you for reading!<br>
+
+<br>
+</a><a name="stc">
+</a><hr>
+<a name="stc"><br>
+
+The following are lines sent from the server to the client:<br>
+
+<br>
+
+</a><table>
+<tbody><tr>
+<td class="stc">Nope.</td><td class="stc">Invalid connection.</td>
+</tr>
+<tr>
+<td class="stc">Invalid name or password.</td><td class="stc">Invalid login.</td>
+</tr>
+<tr>
+<td class="stc">Name already taken: Please select another name.</td><td class="stc">Provided name is already taken.</td>
+</tr>
+<tr>
+<td class="stc">Dragonroar</td><td class="stc">Plays introduction sound (Welcome!).</td>
+</tr>
+<tr>
+<td class="stc">V{XXXX}</td><td class="stc">Version of the protocol the client should be reading.</td>
+</tr>
+<tr>
+<td class="stc">END</td><td class="stc">End of MOTD; begin login.</td>
+</tr>
+<tr>
+<td class="stc">&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;</td><td class="stc">Successful login.</td>
+</tr>
+<tr>
+<td class="stc">!(n)</td><td class="stc">Client plays sound 'n'.</td>
+</tr>
+<tr>
+<td class="stc">%(n)</td><td class="stc">Item 'n' is placed at furre's feet.</td>
+</tr>
+<tr>
+<td class="stc">%0{name}</td><td class="stc">'Name' is offline.</td>
+</tr>
+<tr>
+<td class="stc">%1{name}</td><td class="stc">'Name' is online.</td>
+</tr>
+<tr>
+<td class="stc">([{foo}]</td><td class="stc">Writes to output ['foo'].</td>
+</tr>
+<tr>
+<td class="stc">)(x1)(y1)</td><td class="stc">Furre is removed from (x1,y1).</td>
+</tr>
+<tr>
+<td class="stc">/{colors}(x1)(y1)(n)(x2)(y2)</td><td class="stc">Animates a furre from (x1,y1) to (X2,y2) with frame number 'n'.</td>
+</tr>
+<tr>
+<td class="stc">1(x1)(y1)(n)</td><td class="stc">Draws floor number 'n' at (x1,y1).</td>
+</tr>
+<tr>
+<td class="stc">6(x1)(y1)(x2)(y2)(n)</td><td class="stc">Execute a self-induced DS trigger.<br>x and y are furre coordinates.<br>'n' is trigger location in DS.</td>
+</tr>
+<tr>
+<td class="stc">7(x1)(y1)(x2)(y2)(n)</td><td class="stc">Execute an other-induced DS trigger.<br>x and y are furre coordinates.<br>'n' is trigger location in DS.</td>
+</tr>
+<tr>
+<td class="stc">8-trigger</td><td class="stc">It exists, but I'm not quite sure yet. :)</td>
+</tr>
+<tr>
+<td class="stc">;{map.map}</td><td class="stc">Client loads map.map.</td>
+</tr>
+<tr>
+<td class="stc">&lt;{colors}(x1)(y1)(n)"</td><td class="stc">Draws a furre at (x1,y1) with frame number 'n'.</td>
+</tr>
+<tr>
+<td class="stc">=</td><td class="stc">Draw all queued drawing data; refresh client.</td>
+</tr>
+<tr>
+<td class="stc">&gt;(x1)(y1)(n)</td><td class="stc">Draws object number 'n' at (x1,y1).</td>
+</tr>
+<tr>
+<td class="stc">@(x1)(y1)[(x2)(y2)]</td><td class="stc">Camera positioned at [from] (x1,y1) [to (x2,y2)].</td>
+</tr>
+<tr>
+<td class="stc">[[{foo}]</td><td class="stc">Client is booted [with message 'foo'].</td>
+</tr>
+<tr>
+<td class="stc">]!</td><td class="stc">Display warning of adult content.</td>
+</tr>
+<tr>
+<td class="stc">]#{n} {o}</td><td class="stc">Display message box ID 'n' with style 'o'.</td>
+</tr>
+<tr>
+<td class="stc">]&amp;{key} pp{name} {n}</td><td class="stc">Display portrait of 'name'.</td>
+</tr>
+<tr>
+<td class="stc">]-#(n)[o][(gender)(species)(markings)]</td><td class="stc">Draws specitag 'n'.<br>[If 'n' = A then draw furre specitag using 'gender', 'species', and 'markings'.]<br>[If 'n' = B then draw Beekin badge 'o'.]</td>
+</tr>
+<tr>
+<td class="stc">]a</td><td class="stc">Client requests gate data.</td>
+</tr>
+<tr>
+<td class="stc">]cc{background.pcx}</td><td class="stc">Client uses background.pcx as background.</td>
+</tr>
+<tr>
+<td class="stc">]f{colors}(gender)(species)(markings){name}</td><td class="stc">Portrait is displayed with 'colors' depending on 'gender', 'species', and 'markings' with 'name'.</td>
+</tr>
+<tr>
+<td class="stc">]j(n)</td><td class="stc">Plays m(n).mid from the client's path.</td>
+</tr>
+<tr>
+<td class="stc">]q {n} {n}</td><td class="stc">Request to download dream 'n'.</td>
+</tr>
+<tr>
+<td class="stc">]r {patch}</td><td class="stc">Uses 'patch' as the client's graphics.</td>
+</tr>
+<tr>
+<td class="stc">]s(x1)(y1)(foo)</td><td class="stc">Renders text 'foo' at (x1,y1).</td>
+</tr>
+<tr>
+<td class="stc">]t(x1)(y1)</td><td class="stc">Removes text as (x1,y1).</td>
+</tr>
+<tr>
+<td class="stc">]u</td><td class="stc">Client requests rgate data.</td>
+</tr>
+<tr>
+<td class="stc">]va(x1)(y1)</td><td class="stc">Dragon breath at (x1,y1).</td>
+</tr>
+<tr>
+<td class="stc">]vb(x1)(y1)</td><td class="stc">Phoenix flame at (x1,y1).</td>
+</tr>
+<tr>
+<td class="stc">]w</td><td class="stc">Client version request.</td>
+</tr>
+<tr>
+<td class="stc">]}{color}</td><td class="stc">Color buffer check for client.</td>
+</tr>
+<tr>
+<td class="stc">^(n)</td><td class="stc">Item 'n' is placed in furre's paws.</td>
+</tr>
+<tr>
+<td class="stc">polo {n}</td><td class="stc">Pong.</td>
+</tr>
+</tbody></table>
+
+<a name="stc"><br>
+</a><a name="ctsc">
+</a><hr>
+<a name="ctsc"><br>
+
+The following are lines sent from the client to the server (common access):<br>
+
+<br>
+
+</a><a name="co">
+<i>Cookies:</i>
+</a><table>
+<tbody><tr>
+<td class="ctsc">"cookies-accept</td><td class="ctsc">Accept cookies from others.</td>
+</tr>
+<tr>
+<td class="ctsc">"cookies-reject</td><td class="ctsc">Reject cookies from others.</td>
+</tr>
+<tr>
+<td class="ctsc">"eat-cookie</td><td class="ctsc">Eat a cookie from one's description.</td>
+</tr>
+<tr>
+<td class="ctsc">"give-cookie {n} [{o}]</td><td class="ctsc">Give a cookie from one's description to furre 'n' [with message 'o'].</td>
+</tr>
+<tr>
+<td class="ctsc">"make-cookie {n} [{o}]</td><td class="ctsc">Makes a cookie for furre 'n' [with message 'o'].</td>
+</tr>
+<tr>
+<td class="ctsc">"make-secret {n} [{o}]</td><td class="ctsc">Makes a cookie for furre 'n' [with message 'o'] without alerting others.</td>
+</tr>
+<tr>
+<td class="ctsc">"munch-cookie</td><td class="ctsc">Eat a cookie from one's description and alert others.</td>
+</tr>
+<tr>
+<td class="ctsc">"secret-cookie {n} [{o}]</td><td class="ctsc">Makes a cookie for furre 'n' [with message 'o'] without alerting others.</td>
+</tr>
+</tbody></table>
+
+<a name="co"><br>
+
+</a><a name="in">
+<i>Interaction:</i>
+</a><table>
+<tbody><tr>
+<td class="ctsc">"{foo}</td><td class="ctsc">Says 'foo'.</td>
+</tr>
+<tr>
+<td class="ctsc">-{foo}</td><td class="ctsc">Yells 'foo'.</td>
+</tr>
+<tr>
+<td class="ctsc">:{foo}</td><td class="ctsc">Emotes 'foo'.</td>
+</tr>
+<tr>
+<td class="ctsc">decline</td><td class="ctsc">Reject a joining/summoning furre's request.</td>
+</tr>
+<tr>
+<td class="ctsc">get</td><td class="ctsc">Picks up or drops an object.</td>
+</tr>
+<tr>
+<td class="ctsc">goalleg</td><td class="ctsc">Go directly to Allegria map.</td>
+</tr>
+<tr>
+<td class="ctsc">goback</td><td class="ctsc">Go directly to previous map.</td>
+</tr>
+<tr>
+<td class="ctsc">gomap {n}</td><td class="ctsc">Go directly to map 'n'.</td>
+</tr>
+<tr>
+<td class="ctsc">gostart</td><td class="ctsc">Go directly to Vinca map.</td>
+</tr>
+<tr>
+<td class="ctsc">help</td><td class="ctsc">Requests help from Beekin Help Channel.</td>
+</tr>
+<tr>
+<td class="ctsc">"info</td><td class="ctsc">Displays information held about one's character on the server.</td>
+</tr>
+<tr>
+<td class="ctsc">join [{n}]</td><td class="ctsc">Request to join the company of a furre ['n'].</td>
+</tr>
+<tr>
+<td class="ctsc">l (x1)(y1)</td><td class="ctsc">Looks at a furre at (x1,y1).</td>
+</tr>
+<tr>
+<td class="ctsc">onln {n}</td><td class="ctsc">Request 'n' online status.</td>
+</tr>
+<tr>
+<td class="ctsc">summon [{n}]</td><td class="ctsc">Request a furre ['n'] to join one's company.</td>
+</tr>
+<tr>
+<td class="ctsc">use</td><td class="ctsc">Use the object in the furre's paws.</td>
+</tr>
+<tr>
+<td class="ctsc">wh {n} {o}</td><td class="ctsc">Whisper 'o' to 'n'.</td>
+</tr>
+<tr>
+<td class="ctsc">vascodagama</td><td class="ctsc">Finished download dream or patch.</td>
+</tr>
+<tr>
+<td class="ctsc">which</td><td class="ctsc">Displays the heimdall
+(server process that controls character interaction) that one's
+character resides on, current index, and one's global ID.</td>
+</tr>
+<tr>
+<td class="ctsc">who</td><td class="ctsc">Retrieve list of users on map from the server.</td>
+</tr>
+</tbody></table>
+
+<a name="in"><br>
+
+</a><a name="ma">
+<i>Manipulation:</i>
+</a><table>
+<tbody><tr>
+<td class="ctsc">breath</td><td class="ctsc">Breaths dragon breath while in Dragon form.</td>
+</tr>
+<tr>
+<td class="ctsc">chcol {colors}(gender)(species)(markings)</td><td class="ctsc">Silver Sponsorship members can change colors, gender, species, or markings online.</td>
+</tr>
+<tr>
+<td class="ctsc">chdesc {description}</td><td class="ctsc">Silver Sponsorship members can change description to 'description' online.</td>
+</tr>
+<tr>
+<td class="ctsc">color {colors}(gender)(species)(markings)</td><td class="ctsc">Silver Sponsorship members can change colors, gender, species, or markings online.</td>
+</tr>
+<tr>
+<td class="ctsc">dragon</td><td class="ctsc">Transform into Dragon form.</td>
+</tr>
+<tr>
+<td class="ctsc">desc {description}</td><td class="ctsc">Change description to 'description' online.</td>
+</tr>
+<tr>
+<td class="ctsc">eagle</td><td class="ctsc">Transform into Eagle form while in Gryphon form.</td>
+</tr>
+<tr>
+<td class="ctsc">flame</td><td class="ctsc">Flames Phoenix flame while in Phoenix form.</td>
+</tr>
+<tr>
+<td class="ctsc">gryffe</td><td class="ctsc">Transform into Gryphon form.</td>
+</tr>
+<tr>
+<td class="ctsc">phoenix</td><td class="ctsc">Transform into Phoenix form.</td>
+</tr>
+<tr>
+<td class="ctsc">portrchng</td><td class="ctsc">Swap to next available portrait.</td>
+</tr>
+<tr>
+<td class="ctsc">wings</td><td class="ctsc">Transform into furre with wings.</td>
+</tr>
+</tbody></table>
+
+<a name="ma"><br>
+
+</a><a name="mo">
+<i>Movement:</i>
+</a><table>
+<tbody><tr>
+<td class="ctsc">&lt;</td><td class="ctsc">Rotate counter-clockwise.</td>
+</tr>
+<tr>
+<td class="ctsc">&gt;</td><td class="ctsc">Rotate clockwise.</td>
+</tr>
+<tr>
+<td class="ctsc">lie</td><td class="ctsc">Toggles from lying to sitting to standing.</td>
+</tr>
+<tr>
+<td class="ctsc">liedown</td><td class="ctsc">Go directly to lying down frame.</td>
+</tr>
+<tr>
+<td class="ctsc">m 1</td><td class="ctsc">Move southwest.</td>
+</tr>
+<tr>
+<td class="ctsc">m 3</td><td class="ctsc">Move northwest.</td>
+</tr>
+<tr>
+<td class="ctsc">m 7</td><td class="ctsc">Move northeast.</td>
+</tr>
+<tr>
+<td class="ctsc">m 9</td><td class="ctsc">Move southeast.</td>
+</tr>
+<tr>
+<td class="ctsc">sit</td><td class="ctsc">Go directly to sitting down frame.</td>
+</tr>
+<tr>
+<td class="ctsc">stand</td><td class="ctsc">Go directly to standing up frame.</td>
+</tr>
+</tbody></table>
+
+<a name="mo"><br>
+
+</a><a name="ro">
+<i>Roses:</i>
+</a><table>
+<tbody><tr>
+<td class="ctsc">"discard-rose</td><td class="ctsc">Removes a rose from one's description.</td>
+</tr>
+<tr>
+<td class="ctsc">"discard-red-rose</td><td class="ctsc">Removes a red rose from one's description.</td>
+</tr>
+<tr>
+<td class="ctsc">"discard-white-rose</td><td class="ctsc">Removes a white rose from one's description.</td>
+</tr>
+<tr>
+<td class="ctsc">"discard-yellow-rose</td><td class="ctsc">Removes a yellow rose from one's description.</td>
+</tr>
+<tr>
+<td class="ctsc">"give-rose {n} [{o}]</td><td class="ctsc">Give a rose to furre 'n' [with message 'o'].</td>
+</tr>
+<tr>
+<td class="ctsc">"give-red-rose {n} [{o}]</td><td class="ctsc">Give a red rose to furre 'n' [with message 'o'].</td>
+</tr>
+<tr>
+<td class="ctsc">"give-white-rose {n} [{o}]</td><td class="ctsc">Give a white rose to furre 'n' [with message 'o'].</td>
+</tr>
+<tr>
+<td class="ctsc">"give-yellow-rose {n} [{o}]</td><td class="ctsc">Give a yellow rose to furre 'n' [with message 'o'].</td>
+</tr>
+</tbody></table>
+
+<a name="ro"><br>
+
+</a><a name="se">
+<i>Server Control:</i>
+</a><table>
+<tbody><tr>
+<td class="ctsc">=news</td><td class="ctsc">Toggles news channel.</td>
+</tr>
+<tr>
+<td class="ctsc">=event</td><td class="ctsc">Toggles event channel.</td>
+</tr>
+<tr>
+<td class="ctsc">ROLL {n}d{o}</td><td class="ctsc">Rolls 'n' die with 'o' sides with detailed results.</td>
+</tr>
+<tr>
+<td class="ctsc">Winver {X}</td><td class="ctsc">Version of user's Windows.</td>
+</tr>
+<tr>
+<td class="ctsc">connect {name} {password} {hash}</td><td class="ctsc">Connect to server using 'name' and 'password'.  'hash' is sent to the server and a response is sent back activating the client.</td>
+</tr>
+<tr>
+<td class="ctsc">create {name} {password} {e-mail} N Y</td><td class="ctsc">Create a character with 'name' using 'password' at 'e-mail'.  Not sure what N Y means.</td>
+</tr>
+<tr>
+<td class="ctsc">desctags</td><td class="ctsc">Toggles description tags.</td>
+</tr>
+<tr>
+<td class="ctsc">iamhere</td><td class="ctsc">Keep the client's connection alive.</td>
+</tr>
+<tr>
+<td class="ctsc">marco {n}</td><td class="ctsc">Ping.</td>
+</tr>
+<tr>
+<td class="ctsc">polon {n}</td><td class="ctsc">Pong.</td>
+</tr>
+<tr>
+<td class="ctsc">quit</td><td class="ctsc">Quit Furcadia.</td>
+</tr>
+<tr>
+<td class="ctsc">reconnect</td><td class="ctsc">Force a reconnection.</td>
+</tr>
+<tr>
+<td class="ctsc">repq {n} {o}</td><td class="ctsc">Reply to question 'n' with answer 'o'.</td>
+</tr>
+<tr>
+<td class="ctsc">rgate</td><td class="ctsc">Request to upload a dream.</td>
+</tr>
+<tr>
+<td class="ctsc">roll {n}d{o}</td><td class="ctsc">Rolls 'n' die with 'o' sides.</td>
+</tr>
+<tr>
+<td class="ctsc">setemail {n}</td><td class="ctsc">Set one's e-mail address to 'n'.</td>
+</tr>
+<tr>
+<td class="ctsc">tdgate {n}</td><td class="ctsc">Register dream ID 'n'.</td>
+</tr>
+<tr>
+<td class="ctsc">time</td><td class="ctsc">Request Furcadia central time.</td>
+</tr>
+<tr>
+<td class="ctsc">version {n}</td><td class="ctsc">Send client's version 'n'.</td>
+</tr>
+</tbody></table>
+
+<a name="se"><br>
+
+</a><a name="tr">
+<i>Trade:</i>
+</a><table>
+<tbody><tr>
+<td class="ctsc">"trade-accept</td><td class="ctsc">Finalize a trade.</td>
+</tr>
+<tr>
+<td class="ctsc">"trade-add {n}</td><td class="ctsc">Add item 'n' to trade. *</td>
+</tr>
+<tr>
+<td class="ctsc">"trade-end</td><td class="ctsc">Ends a trade.</td>
+</tr>
+<tr>
+<td class="ctsc">"trade-reject</td><td class="ctsc">Reject a trade.</td>
+</tr>
+<tr>
+<td class="ctsc">"trade-remove {n}</td><td class="ctsc">Remove item 'n' from trade. *</td>
+</tr>
+<tr>
+<td class="ctsc">"trade-start [{n}]</td><td class="ctsc">Begin a trade [with furre 'n'].</td>
+</tr>
+<tr>
+<td class="ctsc">"trade-status</td><td class="ctsc">View status of a trade.</td>
+</tr>
+</tbody></table>
+<a name="tr">* Items to trade: b (butterfly wings), c (classics), d (dragon), g (gryffe), p (phoenix), t (triwings)<br>
+
+<br>
+</a><a name="ctsd">
+</a><hr>
+<a name="ctsd"><br>
+
+The following are lines sent from the client to the server (Dream owner access):<br>
+
+<br>
+
+</a><table>
+<tbody><tr>
+<td class="ctsd">"eject {n}</td><td class="ctsd">Eject user 'n' from dream.</td>
+</tr>
+<tr>
+<td class="ctsd">"emit {n}</td><td class="ctsd">Emit message 'n' to furres in radius.</td>
+</tr>
+<tr>
+<td class="ctsd">"emitloud {n}</td><td class="ctsd">Emit message 'n' to everyone.</td>
+</tr>
+<tr>
+<td class="ctsd">"entrymusic {n}</td><td class="ctsd">Set dream music to 'n'.</td>
+</tr>
+<tr>
+<td class="ctsd">"entrytext {n}</td><td class="ctsd">Set dream text to 'n'.</td>
+</tr>
+<tr>
+<td class="ctsd">"pads-all</td><td class="ctsd">Furres can upload dreams to any upload pad.</td>
+</tr>
+<tr>
+<td class="ctsd">"pads-owner</td><td class="ctsd">Only dream owner can upload dreams to upload pad.</td>
+</tr>
+<tr>
+<td class="ctsd">"pads-shared</td><td class="ctsd">Dream owner and shared users can upload dreams to upload pad.</td>
+</tr>
+<tr>
+<td class="ctsd">parental</td><td class="ctsd">Set a parental rating on one's dream.</td>
+</tr>
+<tr>
+<td class="ctsd">"share {n}</td><td class="ctsd">Share control of dream with 'n'.</td>
+</tr>
+<tr>
+<td class="ctsd">shield</td><td class="ctsd">Direct all summoned furres to the entrance of one's dream.</td>
+</tr>
+<tr>
+<td class="ctsd">unload</td><td class="ctsd">Unload a dream.</td>
+</tr>
+<tr>
+<td class="ctsd">unload all</td><td class="ctsd">Unload all dreams.</td>
+</tr>
+<tr>
+<td class="ctsd">unload {n}</td><td class="ctsd">Unload dream 'n'.</td>
+</tr>
+<tr>
+<td class="ctsd">"unshare {n}</td><td class="ctsd">Unshare dream ownership with 'n'.</td>
+</tr>
+<tr>
+<td class="ctsd">"uploads-all</td><td class="ctsd">All furres can upload a dream to any empty spot.</td>
+</tr>
+<tr>
+<td class="ctsd">"uploads-owner</td><td class="ctsd">Only dream owner can upload a dream to any empty spot.</td>
+</tr>
+<tr>
+<td class="ctsd">"uploads-shared</td><td class="ctsd">Only dream owner and shared users can upload a dream to any empty spot.</td>
+</tr>
+</tbody></table>
+
+<a name="ctsd"><br>
+</a><a name="ctsb">
+</a><hr>
+<a name="ctsb"><br>
+
+The following are lines sent from the client to the server (Beekin access):<br>
+
+<br>
+
+</a><table>
+<tbody><tr>
+<td class="ctsb">bb</td><td class="ctsb">Join Beekin channel.</td>
+</tr>
+<tr>
+<td class="ctsb">"block {n} {o} {p}</td><td class="ctsb">Ban furre 'n' for 'o' hours because reason 'p'.</td>
+</tr>
+<tr>
+<td class="ctsb">"boot {n} {o}</td><td class="ctsb">Boot furre 'n' with reason 'o'.</td>
+</tr>
+<tr>
+<td class="ctsb">"booty {n} {o}</td><td class="ctsb">Boot furre 'n' with reason 'o'.</td>
+</tr>
+<tr>
+<td class="ctsb">c {n}</td><td class="ctsb">Claim 'n' help request.</td>
+</tr>
+<tr>
+<td class="ctsb">claim {n}</td><td class="ctsb">Claim 'n' help request.</td>
+</tr>
+<tr>
+<td class="ctsb">clear {n}</td><td class="ctsb">Clear 'n' help request from help queue.</td>
+</tr>
+<tr>
+<td class="ctsb">isbeek {n}</td><td class="ctsb">Beekin access levels for 'n'.</td>
+</tr>
+<tr>
+<td class="ctsb">jg {n}</td><td class="ctsb">Join group 'n'.</td>
+</tr>
+<tr>
+<td class="ctsb">leave</td><td class="ctsb">Go off duty.</td>
+</tr>
+<tr>
+<td class="ctsb">"list</td><td class="ctsb">List available Beekin commands.</td>
+</tr>
+<tr>
+<td class="ctsb">"listf</td><td class="ctsb">Furres requesting assistance and Beekins on duty.</td>
+</tr>
+<tr>
+<td class="ctsb">ob</td><td class="ctsb">Join Guardian channel.</td>
+</tr>
+<tr>
+<td class="ctsb">onduty</td><td class="ctsb">Count of available Beekins in their respective groups.</td>
+</tr>
+<tr>
+<td class="ctsb">que</td><td class="ctsb">Queued help requests in Help Channel.</td>
+</tr>
+<tr>
+<td class="ctsb">rap {n}</td><td class="ctsb">View rap sheet of 'n'.</td>
+</tr>
+<tr>
+<td class="ctsb">report 'n'</td><td class="ctsb">Report of a furre and their history.</td>
+</tr>
+<tr>
+<td class="ctsb">"sendd {n} {o}</td><td class="ctsb">Send 'n' to Dream Channel with reason 'o'.</td>
+</tr>
+<tr>
+<td class="ctsb">"sendg {n} {o}</td><td class="ctsb">Send 'n' to Guardian Channel with reason 'o'.</td>
+</tr>
+<tr>
+<td class="ctsb">"sendh {n} {o}</td><td class="ctsb">Send 'n' to Help Channel with reason 'o'.</td>
+</tr>
+<tr>
+<td class="ctsb">"sendw {n} {o}</td><td class="ctsb">Send 'n' to Welcome Channel with reason 'o'.</td>
+</tr>
+<tr>
+<td class="ctsb">staffdream</td><td class="ctsb">Go to staff dream map.</td>
+</tr>
+<tr>
+<td class="ctsb">tellgroup {n}</td><td class="ctsb">Tell 'n' to one's Beekin group.</td>
+</tr>
+<tr>
+<td class="ctsb">telltrainees {n}</td><td class="ctsb">Tell 'n' to all Beekin trainees.</td>
+</tr>
+<tr>
+<td class="ctsb">"transd {n}</td><td class="ctsb">Transfer 'n' to Dream Channel.</td>
+</tr>
+<tr>
+<td class="ctsb">"transg {n}</td><td class="ctsb">Transfer 'n' to Guardian Channel.</td>
+</tr>
+<tr>
+<td class="ctsb">"transh {n}</td><td class="ctsb">Transfer 'n' to Help Channel.</td>
+</tr>
+<tr>
+<td class="ctsb">"transw {n}</td><td class="ctsb">Transfer 'n' to Welcome Channel.</td>
+</tr>
+<tr>
+<td class="ctsb">"url {n}</td><td class="ctsb">Transfer 'n' to Dream Channel.</td>
+</tr>
+</tbody></table>
+
+<a name="ctsb"><br>
+</a><a name="ex">
+</a><hr>
+<a name="ex"><br>
+
+An example of a regular connection (to Chess map):<br>
+(<font color="#ff0000">Red</font> is client; <font color="#00ff00">Green</font> is server)<br>
+
+<br>
+<font color="#00ff00">
+MOTD<br>
+Dragonroar<br>
+V0013<br>
+END<br>
+<br>
+<font color="#ff0000">
+connect Xemberad PWD machineID<br>
+desc Live simply so that others may simply live. [Are you new? Need help? Just ask. #SA]<br>
+color ..I"- 8&lt;83!# <br>
+<font color="#00ff00">
+\responseID<br>
+&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;&amp;<br>
+]w<br>
+]marco 99<br>
+([*] News Channel on.<br>
+([*] Talzhemir channel on. Mrrelcome!<br>
+([*] Welcome to the Felorin channel - all Felorin, all the time.<br>
+]ccmarbled.pcx<br>
+&lt;                <br>
+]}            !<br>
+~<br>
+;chess.map<br>
+1z (xI (xJ (.7 ( # + ( # - ( # / ( # 1 ( # 3 ( # 5 ( # 7 ( # 9 ( # ; (
+# = ( # ? ( # A ( # C ( # E ( # G ( # I ( # K ( # M ( # O (+( Q (+) ('y
+S (+* ('z S (++ ('{ S ( ' (<br>
+&gt; ' 0#6 ' 6 ' 8 ( 4#? ( 5#; ) 0 ) 1#9 * 0 + @ , B - 6#8 - ?#; - @#?
+- A / 9#&gt; / &gt;#5 / ?#9 0 ; 0 = 0 O#5<br>
+0  !mL *Q   <br>
+]r default 12345<br>
+%#?<br>
+&lt;..I"- 8&lt;83 &amp; 3  <br>
+&lt;..I"- 8&lt;83 &amp; 3 _<br>
+8 #:ntd   <br>
+6 &amp; 3 &amp; 3 ! &amp; 3<br>
+@ &amp; &gt;<br>
+%#?<br>
+~<br>
+) &amp; 3<br>
+&lt;..I"- 8&lt;83 &amp; &gt; _<br>
+=<br>
+@ &amp; &gt;<br>
+=<br>
+@ &amp; A<br>
+%  <br>
+~<br>
+) &amp; &gt;<br>
+&lt;..I"- 8&lt;83 &amp; A _<br>
+=<br>
+&lt;..I"- 8&lt;83 &amp; A _<br>
+&lt;..I"- 8&lt;83 &amp; A _<br>
+]}..I"- 8&lt;83!# <br>
+<font color="#ff0000">version 21.0<br>
+<font color="#00ff00">polon 99<br>
+<font color="#ff0000">Winver 5.1<br>
+vascodagama<br>
+quit<br>
+</font>
+<font color="#eeca24">
+
+<br>
+</font></font></font></font></font></font></a><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#eeca24"><a name="ff">
+</a></font></font></font></font></font></font><hr>
+<font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#eeca24"><a name="ff"><br>
+
+Furcadia file formats:<br>
+
+<br>
+</a><table class="ffb">
+<tbody><tr>
+<td class="ff">
+<i><u>Map File Format:</u></i><br>
+This format is for unencrypted maps only.<br>
+<br>
+MAP V01.XX Furcadia\n<br>
+height=NUMBER\n<br>
+width=NUMBER\n<br>
+revision=NUMBER\n<br>
+patcht=PATCH TYPE\n<br>
+patchs=DIRECTORY OR SERVER-NAME\n<br>
+encoded=1 OR 0\n<br>
+BODY\n<br>
+ width * height = Floor entry<br>
+  (unsigned short, entries stored starting at 0,0, then 0,1, etc.)<br>
+ width * height = Object entry<br>
+  (unsigned short, entries stored starting at 0,0, then 0,1, etc.)<br>
+ width * height * direction = Wall entry<br>
+  (unsigned byte, entries stored starting at 0,0, then 0,1, etc...<br>
+  direction consists of northwest wall, then the northeast wall)<br>
+</td>
+</tr>
+</tbody></table>
+
+<a name="ff"><br>
+
+</a><table class="ffb">
+<tbody><tr>
+<td class="ff">
+<i><u>FSH File Format:</u></i><br>
+This format applies to both encrypted and unencrypted FSHes. The only difference is that<br>
+the palette entries for encrypted FSHes vary from entry to entry, so I think it's possible<br>
+that there's some sort of checksum involved.<br>
+<br>
+unsigned short  - chunk count (a chunk is a FSH entry)<br>
+unsigned short * (chunk count) - chunk size<br>
+chunk * chunk count - chunks<br>
+<br>
+<i>Chunk:</i><br>
+ unsigned byte - width<br>
+ unsigned byte - height<br>
+ signed byte - X Offset<br>
+ signed byte - Y Offset<br>
+ width * height - Index of palette color used at specified pixel<br>
+  (The entries are reflected, that is, the last row is stored first.<br>
+  So, in a 32 by 64 entry, drawn location 0,64 is the first byte read,<br>
+  1,64 is the second byte read, etc.)<br>
+</td>
+</tr>
+</tbody></table>
+
+<a name="ff"><br>
+
+</a><table class="ffb">
+<tbody><tr>
+<td class="ff">
+<i><u>FS2 File Format:</u></i><br>
+This file format is very similar to the FSH in the respect that it stores images the same way.<br>
+<br>
+<table>
+<tbody><tr><td width="75" class="ff">Position</td><td width="75" class="ff">Type</td><td class="ff">Description</td></tr>
+<tr><td width="75" class="ff">00h</td><td width="75" class="ff">char[7]</td><td class="ff">'FSH2 001'</td></tr>
+<tr><td width="75" class="ff">08h</td><td width="75" class="ff">u?short</td><td class="ff">Image Entries (chunks)</td></tr>
+<tr><td width="75" class="ff">0Ah</td><td width="75" class="ff">???</td><td class="ff">???</td></tr>
+<tr><td width="75" class="ff">10h</td><td width="75" class="ff">---</td><td class="ff">Entries start</td></tr>
+</tbody></table>
+<br>
+<i>Entry:</i><br>
+ unsigned byte - width<br>
+ unsigned byte - height<br>
+ signed byte - X Offset<br>
+ signed byte - Y Offset<br>
+ unsigned? short - Object # to replace<br>
+ width * height - Index of palette color used at specified pixel<br>
+  (The entries are reflected, that is, the last row is stored first.<br>
+  So, in a 32 by 64 entry, drawn location 0,64 is the first byte read,<br>
+  1,64 is the second byte read, etc.)<br>
+</td></tr>
+</tbody></table>
+
+<a name="ff"><br>
+
+</a><table class="ffb">
+<tbody><tr>
+<td class="ff">
+<i><u>FBJ File Format:</u></i><br>
+This format can be tricky because the entries' properties can range from one to three bytes.<br>
+<br>
+<table>
+<tbody><tr><td width="75" class="ff">Position</td><td width="75" class="ff">Type</td><td class="ff">Description</td></tr>
+<tr><td width="75" class="ff">00h</td><td width="75" class="ff">char[3]</td><td class="ff">'FO01' - Version Information</td></tr>
+<tr><td width="75" class="ff">04h</td><td width="75" class="ff">u?short</td><td class="ff">Number of Entries</td></tr>
+<tr><td width="75" class="ff">06h</td><td width="75" class="ff">u?short</td><td class="ff">???</td></tr>
+<tr><td width="75" class="ff">08h</td><td width="75" class="ff">---</td><td class="ff">FBJ Entries...</td></tr>
+</tbody></table>
+
+<br>
+
+Entries (length dependent upon if x, y coords are used)<br>
+        (all bytes are signed):<br>
+
+<br>
+<i>Properties:</i><br>
+(X == 0) &amp;&amp; (Y == 0)<br>
+(length: 1 byte)<br>
+---------------------------------<br>
+<table>
+<tbody><tr><td width="175" class="ff">Nothing</td><td>::</td><td class="ff">00h</td></tr>
+<tr><td width="175" class="ff">Walkable</td><td>::</td><td class="ff">01h</td></tr>
+<tr><td width="175" class="ff">Gettable</td><td>::</td><td class="ff">02h</td></tr>
+<tr><td width="175" class="ff">Gettable and Walkable</td><td>::</td><td class="ff">03h</td></tr>
+<tr><td width="175" class="ff">Sittable</td><td>::</td><td class="ff">04h</td></tr>
+<tr><td width="175" class="ff">Sittable and Walkable</td><td>::</td><td class="ff">05h</td></tr>
+<tr><td width="175" class="ff">Sittable and Gettable</td><td>::</td><td class="ff">06h</td></tr>
+<tr><td width="175" class="ff">Sittable, Gettable, &amp; Walkable</td><td>::</td><td class="ff">07h</td></tr>
+</tbody></table>
+
+<br>
+
+(X &lt;&gt; 0) &amp;&amp; (Y == 0)<br>
+(length: 2 bytes)<br>
+---------------------------------<br>
+<table>
+<tbody><tr><td width="175" class="ff">Nothing</td><td>::</td><td class="ff">08h, XXh</td></tr>
+<tr><td width="175" class="ff">Walkable</td><td>::</td><td class="ff">09h, XXh</td></tr>
+<tr><td width="175" class="ff">Gettable</td><td>::</td><td class="ff">0Ah, XXh</td></tr>
+<tr><td width="175" class="ff">Gettable and Walkable</td><td>::</td><td class="ff">0Bh, XXh</td></tr>
+<tr><td width="175" class="ff">Sittable</td><td>::</td><td class="ff">0Ch, XXh</td></tr>
+<tr><td width="175" class="ff">Sittable and Walkable</td><td>::</td><td class="ff">0Dh, XXh</td></tr>
+<tr><td width="175" class="ff">Sittable and Gettable</td><td>::</td><td class="ff">0Eh, XXh</td></tr>
+<tr><td width="175" class="ff">Sittable, Gettable, &amp; Walkable</td><td>::</td><td class="ff">0Fh, XXh</td></tr>
+</tbody></table>
+
+<br>
+
+(X == 0) &amp;&amp; (Y &lt;&gt; 0)<br>
+(length: 2 bytes)<br>
+---------------------------------<br>
+<table>
+<tbody><tr><td width="175" class="ff">Nothing</td><td>::</td><td class="ff">10h, YYh</td></tr>
+<tr><td width="175" class="ff">Walkable</td><td>::</td><td class="ff">11h, YYh</td></tr>
+<tr><td width="175" class="ff">Gettable</td><td>::</td><td class="ff">12h, YYh</td></tr>
+<tr><td width="175" class="ff">Gettable and Walkable</td><td>::</td><td class="ff">13h, YYh</td></tr>
+<tr><td width="175" class="ff">Sittable</td><td>::</td><td class="ff">14h, YYh</td></tr>
+<tr><td width="175" class="ff">Sittable and Walkable</td><td>::</td><td class="ff">15h, YYh</td></tr>
+<tr><td width="175" class="ff">Sittable and Gettable</td><td>::</td><td class="ff">16h, YYh</td></tr>
+<tr><td width="175" class="ff">Sittable, Gettable, &amp; Walkable</td><td>::</td><td class="ff">17h, YYh</td></tr>
+</tbody></table>
+
+<br>
+
+(X &lt;&gt; 0) &amp;&amp; (Y &lt;&gt; 0)<br>
+(length: 3 bytes)<br>
+---------------------------------<br>
+<table>
+<tbody><tr><td width="175" class="ff">Nothing</td><td>::</td><td class="ff">18h, XXh, YYh</td></tr>
+<tr><td width="175" class="ff">Walkable</td><td>::</td><td class="ff">19h, XXh, YYh</td></tr>
+<tr><td width="175" class="ff">Gettable</td><td>::</td><td class="ff">1Ah, XXh, YYh</td></tr>
+<tr><td width="175" class="ff">Gettable and Walkable</td><td>::</td><td class="ff">1Bh, XXh, YYh</td></tr>
+<tr><td width="175" class="ff">Sittable</td><td>::</td><td class="ff">1Ch, XXh, YYh</td></tr>
+<tr><td width="175" class="ff">Sittable and Walkable</td><td>::</td><td class="ff">1Dh, XXh, YYh</td></tr>
+<tr><td width="175" class="ff">Sittable and Gettable</td><td>::</td><td class="ff">1Eh, XXh, YYh</td></tr>
+<tr><td width="175" class="ff">Sittable, Gettable, &amp; Walkable</td><td>::</td><td class="ff">1Fh, XXh, YYh</td></tr>
+</tbody></table>
+</td>
+</tr>
+</tbody></table>
+
+<a name="ff"><br>
+
+</a><table class="ffb">
+<tbody><tr>
+<td class="ff">
+<i><u>DSB File Format:</u></i><br>
+The last file format is quite useful because if you get it in your cache, you can get the DS to the dream.<br>
+
+<br>
+
+<table>
+<tbody><tr><td width="100" class="ff">Position</td><td width="100" class="ff">Size</td><td class="ff">Desc</td></tr>
+<tr><td width="100" class="ff">00h</td><td width="100" class="ff">04h</td><td class="ff">DSB1</td></tr>
+<tr><td width="100" class="ff">04h</td><td width="100" class="ff">0Fh</td><td class="ff">Don't care</td></tr>
+<tr><td width="100" class="ff">15h</td><td width="100" class="ff">To EOF</td><td class="ff">Triggers</td></tr>
+<tr><td> </td></tr>
+<tr><td width="100" class="ff">Triggers:</td></tr>
+<tr><td width="100" class="ff">Position</td></tr>
+<tr><td width="100" class="ff">00h</td><td width="100" class="ff">2</td><td class="ff">Type (unsigned short)</td></tr>
+<tr><td width="100" class="ff">02h</td><td width="100" class="ff">2</td><td class="ff">Subtype (unsigned short)</td></tr>
+<tr><td width="100" class="ff">04h</td><td width="100" class="ff">2</td><td class="ff">Parameter 1 (signed? short)</td></tr>
+<tr><td width="100" class="ff">06h</td><td width="100" class="ff">2</td><td class="ff">Parameter 2</td></tr>
+<tr><td width="100" class="ff">08h</td><td width="100" class="ff">2</td><td class="ff">Parameter 3</td></tr>
+<tr><td width="100" class="ff">0Ah</td><td width="100" class="ff">2</td><td class="ff">Parameter 4</td></tr>
+<tr><td width="100" class="ff">0Ch</td><td width="100" class="ff">2</td><td class="ff">Parameter 5</td></tr>
+<tr><td width="100" class="ff">0Eh</td><td width="100" class="ff">2</td><td class="ff">Parameter 6</td></tr>
+<tr><td width="100" class="ff">10h</td><td width="100" class="ff">2</td><td class="ff">Parameter 7</td></tr>
+<tr><td width="100" class="ff">12h</td><td width="100" class="ff">2</td><td class="ff">Parameter 8</td></tr>
+</tbody></table>
+</td>
+</tr>
+</tbody></table>
+
+<a name="ff"><br>
+
+Official documentation for Kylix's file formats can be found </a><a href="http://pages.prodigy.net/_seven/furcadiafileformats.txt">here</a>.<br>
+
+<br>
+<a name="cf">
+</a></font></font></font></font></font></font><hr>
+<font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#eeca24"><a name="cf"><br>
+
+Conversion functions:<br>
+
+<br>
+<i><u>C/C++</u></i><br>
+<font color="#eeca24" face="courier new" size="2">
+<b>
+<font color="#008000">// Furcadia string to integer<br></font>
+short furc_ctos(const char *charin)<br>
+{<br>
+<blockquote>
+	if (((unsigned char) charin[0] &lt; 32) || ((unsigned char) charin[0] &gt; 127))<br>
+		<blockquote>return -1;<br></blockquote>
+	if (((unsigned char) charin[1] &lt; 32) || ((unsigned char) charin[1] &gt; 127))<br>
+		<blockquote>return -1;<br></blockquote>
+	return (((unsigned char) charin[0] - 32) * 95) + ((unsigned char) charin[1] - 32);<br>
+</blockquote>
+}<br>
+</b>
+</font>
+
+<br>
+
+<font color="#eeca24" face="courier new" size="2">
+<b>
+<font color="#008000">// Integer to string<br></font>
+void furc_stoc(char *charout, short intin)<br>
+{<br>
+</b></font></a></font></font></font></font></font></font><blockquote>
+<font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#eeca24"><a name="cf"><font color="#eeca24" face="courier new" size="2"><b>	<font color="#008000">// Boundaries</font><br>
+	if (intin &lt;= 0)<br>
+		</b></font></a></font></font></font></font></font></font><blockquote><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#eeca24"><a name="cf"><font color="#eeca24" face="courier new" size="2"><b>intin = 0;<br></b></font></a></font></font></font></font></font></font></blockquote>
+<font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#eeca24"><a name="cf"><font color="#eeca24" face="courier new" size="2"><b>	if (intin &gt;= 9025)
+		</b></font></a></font></font></font></font></font></font><blockquote><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#eeca24"><a name="cf"><font color="#eeca24" face="courier new" size="2"><b>intin = 9025;<br></b></font></a></font></font></font></font></font></font></blockquote>
+<font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#eeca24"><a name="cf"><font color="#eeca24" face="courier new" size="2"><b>	<br>
+	<font color="#008000">// Conversion<br></font>
+	charout[0] = (unsigned char)( (intin / 95) + 32 );<br>
+	charout[1] = (unsigned char)( (intin % 95) + 32);<br>
+	charout[2] = '\0';<br>
+</b></font></a></font></font></font></font></font></font></blockquote>
+<font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#eeca24"><a name="cf"><font color="#eeca24" face="courier new" size="2"><b>}<br>
+
+<br>
+
+<i><u>Visual Basic</u></i><br>
+<font color="#eeca24" face="courier new" size="2">
+<b>
+Public Function FurcToInt(Text As String) As Integer<br>
+<blockquote>
+	<font color="#008000">'Converts a Furcadian number string to an Integer<br></font>
+	Dim NumberString As String<br>
+	Dim BigNumber As Integer, SmallNumber As Integer, WholeNumber As Integer<br>
+	<br>
+	NumberString = Text<br>
+	BigNumber = (Asc(Left$(NumberString, 1)) - 32)<br>
+	BigNumber = BigNumber * 95<br>
+	SmallNumber = Asc(Right$(NumberString, 1)) - 32<br>
+	WholeNumber = BigNumber + SmallNumber<br>
+	FurcToInt = WholeNumber<br>
+</blockquote>
+End Function<br>
+</b>
+</font>
+
+<br>
+
+<font color="#eeca24" face="courier new" size="2">
+<b>
+Public Function IntToFurc(Number As Integer) As String<br>
+<blockquote>
+	<font color="#008000">'Change Integer to a Furcadia number string<br></font>
+	Dim RetStr As String<br>
+	Dim charnum As Integer<br>
+	Dim FrameValue As Integer<br>
+	<br>
+	charnum = Int(Number / 95) + 32<br>
+	RetStr = Chr$(charnum)<br>
+	FrameValue = Number Mod 95<br>
+	charnum = Int(FrameValue) + 32<br>
+	RetStr = RetStr + Chr$(charnum)<br>
+	IntToFurc = RetStr<br>
+</blockquote>
+End Function<br>
+</b>
+</font>
+
+<br>
+</b></font></a><font color="#eeca24" face="courier new" size="2"><a name="con">
+</a></font></font></font></font></font></font></font><hr>
+<font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#eeca24"><font color="#eeca24" face="courier new" size="2"><b><a name="con"><br>
+
+<font color="#eeca24" face="arial" size="2">
+Conclusion:<br>
+<br>
+We hope you found the document useful.<br>
+If there is any information you wish to be made known to the Furcadia users and the public (with all due credit, of course),<br>
+please contact </font></a><font color="#eeca24" face="arial" size="2"><a href="mailto:kylix@email.com">Kylix</a> or <a href="mailto:xemberad@hotmail.com">Xemberad</a> via e-mail or Furcadia to share what you know!<br>
+Good bye!<br>
+
+<br>
+</font></b></font></font></font></font></font></font></font><hr>
+<font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#eeca24"><font color="#eeca24" face="courier new" size="2"><b><font color="#eeca24" face="arial" size="2"><br>
+
+</font></b></font></font></font></font></font></font></font><center><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#eeca24"><font color="#eeca24" face="courier new" size="2"><b><font color="#eeca24" face="arial" size="2">_=[~~ Portions copyrighted Kylix and Xemberad 2004 :: Last updated: January 4th, 2004 ~~]=_</font></b></font></font></font></font></font></font></font></center>
+
+<!-- text below generated by server. PLEASE REMOVE --><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#ff0000"><font color="#00ff00"><font color="#eeca24"><font color="#eeca24" face="courier new" size="2"><b><font color="#eeca24" face="arial" size="2"><script language="JavaScript" src="rfp_files/mc.js"></script><script language="JavaScript" src="rfp_files/geov2.js"></script><script language="javascript">geovisit();</script><img border="0" src="rfp_files/visit.gif">
+<noscript></noscript>
+
+</font></b></font></font></font></font></font></font></font></body></html>
