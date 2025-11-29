@@ -54,6 +54,7 @@ File Formats
 | [FPRT](formats/FPRT.md) | Furcadia Portrait Data            | Portrait graphics & properties                                                                    |
 | [FS2](formats/FS2.md)   | Furcadia Shape File v2            | Successor format to FSH                                                                           |
 | [FSH](formats/FSH.md)   | Furcadia Shape File               | Graphical resources (objects, tiles, ...)                                                         |
+| [INI](formats/INI.md)   | Furcadia Character (INI) File     | Legacy format for logging into characters directly                                                |
 | [HOWL](formats/HOWL.md) | File Cache (Horus)                | Cache format for portraits and other files                                                        |
 | [MAP](formats/MAP.md)   | Furcadia Map (Dream)              | Assigns graphical objects to isometric grid                                                       |
 | [RCH](formats/RCH.md)   | Furcadia Container/Archive        | Used to transfer dream-related files                                                              |
