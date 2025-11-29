@@ -11,24 +11,25 @@ The following is a list of names of those who in some form contributed to this
 project over its many iterations, and thanks to whom this project could reach
 as far as it had.
 
-* Cluracan	
-* Coopper Dragon	
-* Dia Sapphire	
+* Cluracan
+* Coopper Dragon
+* Dia Sapphire
 * Dreamless Dancer (aka: Dream Dancer)
 * Ezoa
 * Félix Wolf
-* Hollyberry	
-* Juntalis	
-* Klass	
+* Hollyberry
+* Juntalis
+* Klass
 * Kunnis
-* Kylix	
-* Morpius	
-* Null Flux	
+* Kylix
+* Lochlann Scuirine
+* Morpius
+* Null Flux
 * Radiant
-* Reunion	
+* Reunion
 * sanctimonious
-* Treeki	
-* Xemberad	
+* Treeki
+* Xemberad
 * xPi
 
 This project started off as an adaptation of the

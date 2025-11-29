@@ -23,11 +23,11 @@ Location
 
 Character .ini files can be stored under the following paths:
 
-| OS         | Path                                                                                                           |
-| ---------- | -------------------------------------------------------------------------------------------------------------- |
-| XP         | c:\Documents and Settings\\`username`\\My Documents\Furcadia\Furcadia Characters\\`name`.ini                   |
-| Vista+     | c:\Users\\`username`\\Documents\Furcadia\Furcadia Characters\\`name`.ini                                       |
-| Linux/Wine | ~/.wine/drive_c/windows/profiles/`$USER`/My\ Documents/Furcadia/Furcadia Characters/`name`.ini                 |
+| OS         | Path                                                                                                                                                       |
+| ---------- | -----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| XP         | c:\Documents and Settings\\`username`\\My Documents\Furcadia\Furcadia Characters\\`name`.ini<br>c:\Program Files\Furcadia\\`name`.ini                      |
+| Vista+     | c:\Users\\`username`\\Documents\Furcadia\Furcadia Characters\\`name`.ini<br>c:\Program Files (x86)\Furcadia\\`name`.ini                                    |
+| Linux/Wine | ~/.wine/drive_c/windows/profiles/`$USER`/My\ Documents/Furcadia/Furcadia Characters/`name`.ini<br>~/.wine/drive_c/Program\ Files (x86)/Furcadia/`name`.ini |
 
 > Note: `name` can be any name you choose, so long as the suffix at the end of
 >       the file is `.ini`. The client does not take it into consideration when
