@@ -21,6 +21,7 @@ benefit of other Furcadians.
 Basic Info
 -------------------------------------------------------------------------------
 * [Furcadia Installation Paths]
+* [Furcadia Hosts](Hosts.md) - archive of IP addresses & DNS
 
 
 Concepts
