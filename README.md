@@ -20,7 +20,7 @@ benefit of other Furcadians.
 
 Basic Info
 -------------------------------------------------------------------------------
-* [Furcadia Installation Paths]
+* [Furcadia Installation Paths](Paths.md) - where Furcadia places its files
 * [Furcadia Hosts](Hosts.md) - archive of IP addresses & DNS
 
 
